@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexaBuilder | Cloud APK Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; }
+    .font-mono { font-family: 'Fira Code', monospace; }
+    
+    /* Efek Kaca Futuristik */
+    .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .glass-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(51, 65, 85, 0.8); transition: all 0.3s ease; }
+    .glass-input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); outline: none; }
+    
+    /* Scrollbar Terminal */
+    .terminal-scroll::-webkit-scrollbar { width: 4px; }
+    .terminal-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    
+    /* Animasi Sidebar */
+    .sidebar-open { transform: translateX(0); }
+    .sidebar-closed { transform: translateX(-100%); }
+    .overlay-open { opacity: 1; visibility: visible; }
+    .overlay-closed { opacity: 0; visibility: hidden; }
+  </style>
+</head>
+<body class="text-slate-200 min-h-screen relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- ================= HEADER / TOP APP BAR ================= -->
+  <header class="glass sticky top-0 z-40 px-5 py-4 flex justify-between items-center shadow-lg">
+    <!-- Kiri: Hamburger Menu -->
+    <button onclick="toggleSidebar()" class="text-slate-300 hover:text-white transition-colors p-1">
+      <i class="fa-solid fa-bars text-xl"></i>
+    </button>
+    
+    <!-- Kanan: Nama Web & Logo -->
+    <div class="flex items-center gap-2">
+      <h1 class="text-lg font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">NexaBuilder</h1>
+      <div class="bg-gradient-to-br from-indigo-500 to-cyan-500 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <i class="fa-solid fa-cube text-white text-sm"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SIDEBAR NAVIGATION ================= -->
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 overlay-closed transition-all duration-300 backdrop-blur-sm"></div>
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-slate-900 border-r border-slate-800 z-50 sidebar-closed transition-transform duration-300 shadow-2xl flex flex-col">
+    <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+      <div class="bg-gradient-to-br from-indigo-500 to-cyan-500 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-cube text-white text-lg"></i>
+      </div>
+      <div>
+        <h2 class="font-bold text-white text-lg">NexaBuilder</h2>
+        <p class="text-[10px] text-indigo-400 uppercase tracking-widest font-semibold">Ultimate Engine v1</p>
+      </div>
+    </div>
+    
+    <nav class="flex-1 p-4 space-y-2">
+      <button onclick="switchTab('workspace')" id="nav-workspace" class="w-full flex items-center gap-3 px-4 py-3 bg-indigo-500/10 text-indigo-400 rounded-xl font-medium transition-all">
+        <i class="fa-solid fa-rocket w-5"></i> Workspace
+      </button>
+      <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-medium transition-all">
+        <i class="fa-solid fa-server w-5"></i> Konfigurasi Server
+      </button>
+      <button onclick="switchTab('guide')" id="nav-guide" class="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-medium transition-all">
+        <i class="fa-solid fa-book-open w-5"></i> Panduan Lengkap
+      </button>
+    </nav>
+    <div class="p-4 border-t border-slate-800 text-center">
+      <p class="text-xs text-slate-500">© 2026 NexaBuilder Studio</p>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main class="max-w-md mx-auto px-4 py-6">
+
+    <!-- 🚀 TAB 1: WORKSPACE (BUILDER) -->
+    <div id="tab-workspace" class="block animate-fade-in space-y-6">
+      <div class="glass rounded-2xl p-5 shadow-xl">
+        <h2 class="text-sm font-semibold text-slate-300 mb-5 flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-indigo-400"></i> Informasi Proyek
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 ml-1">Nama Aplikasi Target</label>
+            <input type="text" id="appName" placeholder="Contoh: Nexa Store" class="w-full glass-input text-sm rounded-xl px-4 py-3 text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 ml-1">URL Website (Tujuan Web-View)</label>
+            <input type="text" id="appUrl" placeholder="https://..." class="w-full glass-input text-sm rounded-xl px-4 py-3 text-white">
+          </div>
+        </div>
+
+        <button onclick="startBuild()" id="buildBtn" class="w-full mt-6 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2">
+          <i class="fa-solid fa-hammer"></i> MULAI BUILD APK
+        </button>
+      </div>
+
+      <!-- Live Terminal Console -->
+      <div class="glass rounded-2xl p-1 shadow-xl">
+        <div class="bg-[#09090b] rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+            <span class="text-xs font-mono text-slate-400"><i class="fa-solid fa-terminal mr-2"></i>Nexa Console</span>
+            <div id="statusBadge" class="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] font-semibold text-slate-400 border border-slate-700 flex items-center gap-1.5">
+              <div class="w-1.5 h-1.5 rounded-full bg-slate-500"></div> Idle
+            </div>
+          </div>
+          <div id="logBox" class="text-[11px] font-mono text-slate-300 h-44 overflow-y-auto terminal-scroll whitespace-pre-wrap leading-relaxed">Selamat datang di NexaBuilder. Sistem siap bereksekusi...</div>
+        </div>
+      </div>
+
+      <!-- Download Button Container -->
+      <div id="downloadContainer" class="hidden animate-fade-in">
+        <button onclick="downloadApk()" id="downloadBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-900 font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 text-lg">
+          <i class="fa-solid fa-download"></i> UNDUH APLIKASI
+        </button>
+      </div>
+    </div>
+
+    <!-- ⚙️ TAB 2: SETTINGS (KONFIGURASI) -->
+    <div id="tab-settings" class="hidden animate-fade-in">
+      <div class="glass rounded-2xl p-5 shadow-xl">
+        <h2 class="text-sm font-semibold text-slate-300 mb-5 flex items-center gap-2">
+          <i class="fa-solid fa-server text-cyan-400"></i> Kredensial Engine GitHub
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 ml-1">Username GitHub</label>
+            <input type="text" id="ghUser" placeholder="Misal: developer61515" class="w-full glass-input text-sm rounded-xl px-4 py-3 text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 ml-1">Nama Repository Mesin</label>
+            <input type="text" id="ghRepo" placeholder="Misal: mesin-apk" class="w-full glass-input text-sm rounded-xl px-4 py-3 text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 ml-1">Personal Access Token</label>
+            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" class="w-full glass-input text-sm rounded-xl px-4 py-3 text-white">
+          </div>
+          <button onclick="saveSettings()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-sm font-bold py-3.5 rounded-xl mt-2 transition-colors">
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Kredensial
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📖 TAB 3: GUIDE (PANDUAN LENGKAP) -->
+    <div id="tab-guide" class="hidden animate-fade-in">
+      <div class="glass rounded-2xl p-5 shadow-xl space-y-6 text-sm text-slate-300">
+        <h2 class="text-lg font-bold text-white border-b border-slate-700 pb-2">Cara Menggunakan NexaBuilder</h2>
+        
+        <div class="space-y-2">
+          <h3 class="font-bold text-indigo-400"><i class="fa-solid fa-1"></i> Siapkan Repository Mesin</h3>
+          <p class="leading-relaxed">Buat repository baru di GitHub kamu (misalnya bernama <code class="bg-slate-800 px-1 rounded text-cyan-400">mesin-apk</code>). Pastikan tipenya Public.</p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-indigo-400"><i class="fa-solid fa-2"></i> Pasang Skrip Anti-Gagal</h3>
+          <p class="leading-relaxed">Di dalam repo tersebut, buat file baru dengan struktur folder: <br><code class="bg-slate-800 px-1 rounded text-cyan-400">.github/workflows/build.yml</code><br>Paste skrip <em>Ultimate Engine</em> yang telah kami sediakan ke dalam file tersebut, lalu klik Commit.</p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-indigo-400"><i class="fa-solid fa-3"></i> Buat Token Akses Rahasia</h3>
+          <p class="leading-relaxed">Buka menu <strong>Settings</strong> di akun GitHub > Developer settings > Personal access tokens > Tokens (classic). Centang perizinan <strong>repo</strong> dan <strong>workflow</strong>. Simpan kode token tersebut (berawalan <em>ghp_...</em>).</p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-indigo-400"><i class="fa-solid fa-4"></i> Hubungkan & Eksekusi</h3>
+          <p class="leading-relaxed">Buka tab <strong>Konfigurasi Server</strong> di aplikasi ini, masukkan data GitHub kamu. Kembali ke tab <strong>Workspace</strong>, isi nama dan URL target, lalu klik Mulai Build!</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= ENGINE LOGIC (JAVASCRIPT) ================= -->
+  <script>
+    let checkInterval, timerInterval, buildStartTime, finalArtifactUrl = "";
+    let pollCount = 0; const MAX_POLLS = 45; // Max 7.5 menit (Pencegahan Hang Menyeluruh)
+
+    // Load Data Tersimpan Saat Aplikasi Dibuka
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('ghUser').value = localStorage.getItem('nexa_user') || '';
+      document.getElementById('ghRepo').value = localStorage.getItem('nexa_repo') || '';
+      document.getElementById('ghToken').value = localStorage.getItem('nexa_token') || '';
+    });
+
+    // Fitur: Sidebar Toggle Controller
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (sidebar.classList.contains('sidebar-closed')) {
+        sidebar.classList.remove('sidebar-closed'); sidebar.classList.add('sidebar-open');
+        overlay.classList.remove('overlay-closed'); overlay.classList.add('overlay-open');
+      } else {
+        sidebar.classList.remove('sidebar-open'); sidebar.classList.add('sidebar-closed');
+        overlay.classList.remove('overlay-open'); overlay.classList.add('overlay-closed');
+      }
+    }
+
+    // Fitur: Tab Switcher Controller
+    function switchTab(tabName) {
+      // Sembunyikan semua tab
+      ['workspace', 'settings', 'guide'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).classList.remove('block');
+        document.getElementById(`nav-${t}`).className = "w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-xl font-medium transition-all";
+      });
+      
+      // Tampilkan tab yang dipilih
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      document.getElementById(`tab-${tabName}`).classList.add('block');
+      document.getElementById(`nav-${tabName}`).className = "w-full flex items-center gap-3 px-4 py-3 bg-indigo-500/10 text-indigo-400 rounded-xl font-medium transition-all";
+      
+      toggleSidebar(); // Tutup otomatis sidebar setelah memilih menu
+    }
+
+    // Fitur: Simpan Pengaturan (Keamanan LocalStorage)
+    function saveSettings() {
+      localStorage.setItem('nexa_user', document.getElementById('ghUser').value.trim());
+      localStorage.setItem('nexa_repo', document.getElementById('ghRepo').value.trim());
+      localStorage.setItem('nexa_token', document.getElementById('ghToken').value.trim());
+      alert("Kredensial Server Berhasil Disimpan ke Perangkat.");
+    }
+
+    // Fitur: Terminal Log Generator
+    function updateLog(msg, color = 'text-slate-300') {
+      const logBox = document.getElementById('logBox');
+      const time = new Date().toLocaleTimeString('id-ID', {hour12:false, minute:'2-digit', second:'2-digit'});
+      logBox.innerHTML += `\n<span class="text-slate-600 font-bold">[${time}]</span> <span class="${color}">${msg}</span>`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // Fitur: Status Badge Updater
+    function updateBadge(text, colorClass) {
+      document.getElementById('statusBadge').innerHTML = `<div class="w-1.5 h-1.5 rounded-full ${colorClass}"></div> ${text}`;
+    }
+
+    // Fitur: Timer Terminal
+    function startTimer() {
+      buildStartTime = Date.now();
+      timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - buildStartTime) / 1000);
+        const m = String(Math.floor(diff / 60)).padStart(2, '0');
+        const s = String(diff % 60).padStart(2, '0');
+        // Fitur tambahan: Menampilkan waktu di status badge
+        const badge = document.getElementById('statusBadge');
+        if(badge.innerText.includes('Building')) {
+           badge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></div> Building (${m}:${s})`;
+        }
+      }, 1000);
+    }
+
+    // ================= CORE ENGINE (PREVENTIVE MAINTENANCE APPLIED) =================
+    async function startBuild() {
+      let appName = document.getElementById('appName').value.trim();
+      let appUrl = document.getElementById('appUrl').value.trim();
+      const user = document.getElementById('ghUser').value.trim() || localStorage.getItem('nexa_user');
+      const repo = document.getElementById('ghRepo').value.trim() || localStorage.getItem('nexa_repo');
+      const token = document.getElementById('ghToken').value.trim() || localStorage.getItem('nexa_token');
+      
+      if (!appName || !appUrl || !user || !repo || !token) {
+        alert("Konfigurasi belum lengkap! Pastikan Nama, URL, dan Kredensial di tab Server sudah terisi.");
+        return;
+      }
+
+      // PREVENTIVE MAINTENANCE 1: Data Sanitization
+      appName = appName.replace(/[^a-zA-Z0-9 ]/g, ""); 
+      if (!appUrl.startsWith('http://') && !appUrl.startsWith('https://')) appUrl = 'https://' + appUrl;
+      document.getElementById('appName').value = appName;
+      document.getElementById('appUrl').value = appUrl;
+
+      // PREVENTIVE MAINTENANCE 2: UI Lock
+      const btn = document.getElementById('buildBtn');
+      document.getElementById('downloadContainer').classList.add('hidden');
+      document.getElementById('logBox').innerHTML = `<span class="text-cyan-400 font-bold">> SYSTEM INITIATED</span>`;
+      
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> SYSTEM PROCESSING...`;
+      updateBadge('Building', 'bg-yellow-400 animate-pulse');
+      
+      clearInterval(checkInterval); clearInterval(timerInterval);
+      pollCount = 0; startTimer();
+
+      try {
+        updateLog("Mengirim instruksi kompilasi ke Server Cloud GitHub...", "text-yellow-400");
+        const response = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/workflows/build.yml/dispatches`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: "main", inputs: { app_name: appName, app_url: appUrl } })
+        });
+
+        if (response.ok || response.status === 204) {
+          updateLog("Handshake Sukses! Mesin Cloud sedang merakit baris kode APK...", "text-emerald-400");
+          updateLog("Estimasi waktu: 2-3 Menit. Harap tetap di halaman ini.");
+          setTimeout(() => { checkInterval = setInterval(() => checkStatus(user, repo, token), 10000); }, 5000);
+        } else {
+          throw new Error(`Akses ditolak (HTTP ${response.status}). Periksa Token & Repo Anda.`);
+        }
+      } catch (error) {
+        updateLog(`FATAL ERROR: ${error.message}`, "text-red-400 font-bold");
+        resetUI();
+      }
+    }
+
+    async function checkStatus(user, repo, token) {
+      pollCount++;
+      // PREVENTIVE MAINTENANCE 3: Infinite Loop Limiter
+      if (pollCount > MAX_POLLS) {
+        updateLog("TIMEOUT: Koneksi terputus dari Server Cloud (Melewati batas 7 menit).", "text-red-400 font-bold");
+        resetUI(); return;
+      }
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs?per_page=1`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return; // Mengabaikan gangguan jaringan sementara (Network Fluctuation Drop)
+
+        const data = await res.json();
+        if (data.workflow_runs && data.workflow_runs.length > 0) {
+          const run = data.workflow_runs[0];
+          updateLog(`System Polling... Status Server: [${run.status.toUpperCase()}]`);
+          
+          if (run.status === "completed") {
+            clearInterval(checkInterval); clearInterval(timerInterval);
+            if (run.conclusion === "success") {
+              updateLog("KOMPILASI SELESAI! Binary APK siap dikirim.", "text-emerald-400 font-bold");
+              updateBadge('Ready', 'bg-emerald-500');
+              getArtifact(user, repo, token, run.id);
+            } else {
+              updateLog("BUILD GAGAL. Eksekusi Gradle terhenti di Server Cloud.", "text-red-500 font-bold");
+              resetUI();
+            }
+          }
+        }
+      } catch (e) {} // Silent catch untuk menjaga engine tetap berjalan
+    }
+
+    async function getArtifact(user, repo, token, runId) {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs/${runId}/artifacts`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.artifacts && data.artifacts.length > 0) {
+          finalArtifactUrl = data.artifacts[0].archive_download_url;
+          document.getElementById('downloadContainer').classList.remove('hidden');
+          updateLog("Sistem Selesai! File siap diunduh.", "text-cyan-400 font-bold text-sm mt-2");
+          resetUI(true);
+        } else {
+          throw new Error("File APK tidak ditemukan di repositori server.");
+        }
+      } catch (e) {
+        updateLog(`ERROR ARTIFACT: ${e.message}`, "text-red-500 font-bold");
+        resetUI();
+      }
+    }
+
+    // PREVENTIVE MAINTENANCE 4: Blob Download Engine (Menghindari pop-up blocker browser HP)
+    async function downloadApk() {
+      const token = document.getElementById('ghToken').value.trim() || localStorage.getItem('nexa_token');
+      const btn = document.getElementById('downloadBtn');
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MENARIK DATA...`;
+      
+      try {
+        const res = await fetch(finalArtifactUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error("Gagal mengambil direktori file");
+        
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${document.getElementById('appName').value.replace(/\s+/g, '_')}_NexaBuild.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> BERHASIL DIUNDUH`;
+        setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH ULANG`; }, 3000);
+      } catch (e) {
+        alert("Gagal mengunduh. Pastikan koneksi internet Anda stabil.");
+        btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH APLIKASI`;
+      }
+    }
+
+    function resetUI(success = false) {
+      const btn = document.getElementById('buildBtn');
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-hammer"></i> BUILD ULANG`;
+      clearInterval(checkInterval); clearInterval(timerInterval);
+      if (!success) updateBadge('Standby', 'bg-slate-500');
+    }
+  </script>
+</body>
+</html>
